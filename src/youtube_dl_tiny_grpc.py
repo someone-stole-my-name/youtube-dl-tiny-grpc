@@ -78,7 +78,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--port', default=os.environ.get('PORT'), type=int, help='Port to listen on')
     parser.add_argument('--graceful', default=30, type=int, help='Graceful shutdown timeout')
-    parser.add_argument('--reflection', default=False, type=bool, help='Enables server reflection')
+    parser.add_argument('--reflection', default=False, type=bool, help='Enables server reflection', action=argparse.BooleanOptionalAction)
     args = parser.parse_args()
     if not args.port:
         sys.exit(parser.print_usage())
