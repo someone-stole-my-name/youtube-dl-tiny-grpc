@@ -1,0 +1,7 @@
+asyncio==3.4.3
+grpcio==1.44.0
+grpcio-reflection==1.44.0
+grpcio-tools==1.44.0
+protobuf==3.19.4
+six==1.16.0
+youtube-dl==2021.12.17

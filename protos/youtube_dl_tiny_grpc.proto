@@ -1,0 +1,89 @@
+syntax = "proto3";
+
+message ExtractInfoResponse {
+    message Formats {
+        uint32 asr = 1;
+        uint32 filesize = 2;
+        string format_id = 3;
+        string format_note = 4;
+        uint32 fps = 5;
+        uint32 height = 6;
+        uint32 quality = 7;
+        double tbr = 8;
+        string url = 9;
+        uint32 width = 10;
+        string ext = 11;
+        string vcodec = 12;
+        string acodec = 13;
+        double abr = 14;
+        string container = 16;
+        string format = 17;
+        string protocol = 18;
+        double vbr = 20;
+    }
+
+    message Thumbnails {
+        uint32 height = 1;
+        string url = 2;
+        uint32 width = 3;
+        string resolution = 4;
+        string id = 5;
+    }
+
+    string id = 1;
+    string title = 2;
+    repeated Formats formats = 3;
+    repeated Thumbnails thumbnails = 4;
+    string description = 5;
+    string upload_date = 6;
+    string uploader = 7;
+    string uploader_id = 8;
+    string uploader_url = 9;
+    string channel_id = 10;
+    string channel_url = 11;
+    uint32 duration = 12;
+    uint32 view_count = 13;;
+    repeated string categories = 17;
+    repeated string tags = 18;
+    string channel = 22;
+    string extractor = 23;
+    string thumbnail = 28;
+    string display_id = 29;
+    string format = 32;
+    string format_id = 33;
+    uint32 width = 34;
+    uint32 height = 35;
+    uint32 resolution = 36;
+    uint32 fps = 37;
+    string vcodec = 38;
+    double vbr = 39;
+    uint32 stretched_ratio = 40;
+    string acodec = 41;
+    double abr = 42;
+    string ext = 43;
+    repeated Formats requested_formats = 44;
+    uint32 asr = 45;
+    uint32 filesize = 46;
+    string format_note = 47;
+    uint32 quality = 48;
+    double tbr = 49;
+    string url = 50;
+    string container = 51;
+    string protocol = 52;
+}
+
+// See https://github.com/ytdl-org/youtube-dl/blob/3e4cedf9e8cd3157df2457df7274d0c842421945/youtube_dl/YoutubeDL.py#L137-L312 for full list of available fields
+message YoutubeDLOptions {
+    string format = 1; // See https://github.com/ytdl-org/youtube-dl/blob/3e4cedf9e8cd3157df2457df7274d0c842421945/youtube_dl/options.py#L388 for more information.
+    uint32 playlistend = 2;
+}
+
+message ExtractInfoRequest {
+    string url = 1; // required
+    YoutubeDLOptions options = 2; // optional
+}
+
+service YoutubeDL {
+    // Return a stream of ExtractInfoResponse with extracted videos.
+    rpc ExtractInfo(ExtractInfoRequest) returns (stream ExtractInfoResponse) {}
+}
