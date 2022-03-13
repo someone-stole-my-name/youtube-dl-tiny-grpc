@@ -1,14 +1,14 @@
 PROJECT = youtube_dl_tiny_grpc
 TRIVY_VERSION := 0.24.2
 PROTOS_DIR := protos
-SRC_DIR := src
 DOCKER_EXTRA_ARGS :=
 BUILDARG_PLATFORM := --platform linux/amd64,linux/arm64/v8
 IMAGENAME := ghcr.io/someone-stole-my-name/youtube-dl-tiny-grpc
 
 clean:
-	rm -rf $(SRC_DIR)/youtube_dl_tiny_grpc_pb2_grpc.py
-	rm -rf $(SRC_DIR)/youtube_dl_tiny_grpc_pb2.py
+	rm -rf dist
+	rm -rf $(PROJECT)/youtube_dl_tiny_grpc_pb2_grpc.py
+	rm -rf $(PROJECT)/youtube_dl_tiny_grpc_pb2.py
 
 build:
 	docker buildx build $(BUILDARG_PLATFORM) -t $(IMAGENAME):latest .
@@ -18,18 +18,21 @@ push: grpc
 	docker buildx build $(BUILDARG_PLATFORM) -t $(IMAGENAME):latest . --push
 	docker buildx build $(BUILDARG_PLATFORM) -t $(IMAGENAME):$(shell git describe --tags --abbrev=0) . --push
 
-$(SRC_DIR)/youtube_dl_tiny_grpc_pb2_grpc.py:
-	python3 -m grpc_tools.protoc -I$(PROTOS_DIR) --grpc_python_out=$(SRC_DIR) $(PROTOS_DIR)/$(PROJECT).proto
+$(PROJECT)/protobuf/youtube_dl_tiny_grpc_pb2_grpc.py:
+	python3 -m grpc_tools.protoc -I$(PROTOS_DIR) --grpc_python_out=$(PROJECT)/protobuf $(PROTOS_DIR)/$(PROJECT).proto
 
-$(SRC_DIR)/youtube_dl_tiny_grpc_pb2.py:
-	python3 -m grpc_tools.protoc -I$(PROTOS_DIR) --python_out=$(SRC_DIR) $(PROTOS_DIR)/$(PROJECT).proto
+$(PROJECT)/protobuf/youtube_dl_tiny_grpc_pb2.py:
+	python3 -m grpc_tools.protoc -I$(PROTOS_DIR) --python_out=$(PROJECT)/protobuf $(PROTOS_DIR)/$(PROJECT).proto
 
 dev:
 	python3 -m venv venv
 	source venv/bin/activate
 	pip install -r requirements.txt
 
-grpc: $(SRC_DIR)/youtube_dl_tiny_grpc_pb2_grpc.py $(SRC_DIR)/youtube_dl_tiny_grpc_pb2.py
+grpc: $(PROJECT)/protobuf/youtube_dl_tiny_grpc_pb2_grpc.py
+grpc: $(PROJECT)/protobuf/youtube_dl_tiny_grpc_pb2.py
+# grpc:
+# 	find $(PROJECT)/protobuf -type f -name "*.py" -print0 | xargs -0 gsed -i -e 's, import '"$target"'_pb2, from . import '"$target"'_pb2, g'
 
 trivy:
 	trivy i \
