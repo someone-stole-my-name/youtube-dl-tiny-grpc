@@ -7,10 +7,11 @@ from .version import __version__
 
 from os import environ
 
-from .util import ( guessType )
+from .util import (guessType)
 
-_COMPRESSION_ALGORITHMS = ["none", "deflate", "gzip" ]
+_COMPRESSION_ALGORITHMS = ["none", "deflate", "gzip"]
 _DESCRIPTION = 'A tiny slice of youtube-dl exposed over gRPC'
+
 
 def parse_opts(argv: list) -> argparse.Namespace:
     """ Parse command line options. """

@@ -52,6 +52,9 @@ test-int-run:
 
 test-int: test-int-start test-int-run
 
+flake:
+	flake8 $(PROJECT) --exclude protobuf
+
 test: grpc build trivy test-int
 
 docker-%:
@@ -77,6 +80,7 @@ ci-deps:
 		qemu-user-static \
 		wget
 	pip3 install -r requirements.txt
+	pip3 install flake8
 
 ci-deps-docker:
 	curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg && \

@@ -49,23 +49,42 @@ class YoutubeDLServer(YoutubeDLServerBase):
             yield ExtractInfoResponse()
 
         ydl_custom_opts = MessageToDict(
-            request.options, including_default_value_fields=False, preserving_proto_field_name=True)
+            request.options,
+            including_default_value_fields=False,
+            preserving_proto_field_name=True
+        )
+
         ydl_opts = {**_YOUTUBE_DL_DEFAULT_OPTS, **ydl_custom_opts}
         ydl_opts['simulate'] = True
 
         loop = asyncio.get_event_loop()
-        info = await loop.run_in_executor(_YOUTUBE_DL_PROCESS_POOL, self._ExtractInfo, request.url, ydl_opts)
+        info = await loop.run_in_executor(
+            _YOUTUBE_DL_PROCESS_POOL,
+            self._ExtractInfo,
+            request.url,
+            ydl_opts)
 
-        # FIXME: Yes, this is a hack. youtube_dl sometimes returns tuples for some repeated fields and ParseDict doesn't like that.
+        # FIXME: Yes, this is a hack.
+        # youtube_dl sometimes returns tuples for some repeated fields
+        # and ParseDict doesn't like that.
         info = json.loads(json.dumps(info))
         try:
             entries = info['entries'][0]['entries']
             for entry in entries:
-                yield ParseDict(entry, ExtractInfoResponse(), ignore_unknown_fields=True)
+                yield ParseDict(
+                    entry,
+                    ExtractInfoResponse(),
+                    ignore_unknown_fields=True)
         except KeyError:
             try:
                 entries = info['entries']
                 for entry in entries:
-                    yield ParseDict(entry, ExtractInfoResponse(), ignore_unknown_fields=True)
-            except:
-                yield ParseDict(info, ExtractInfoResponse(), ignore_unknown_fields=True)
+                    yield ParseDict(
+                        entry,
+                        ExtractInfoResponse(),
+                        ignore_unknown_fields=True)
+            except KeyError:
+                yield ParseDict(
+                    info,
+                    ExtractInfoResponse(),
+                    ignore_unknown_fields=True)

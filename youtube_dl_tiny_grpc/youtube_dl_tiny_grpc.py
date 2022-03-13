@@ -13,7 +13,8 @@ from .youtube_dl_service import shutdown_pool as shutdown_youtube_dl_server
 
 
 class Server():
-    # Holds the shutdown method for the caller to call and clean up, eg: loop.run_until_complete(*server.cleanup)
+    # Holds the shutdown method for the caller to call and clean up
+    # eg: loop.run_until_complete(*server.cleanup)
     cleanup = []
     not_in_shutdown = True  # This triggers an ordered shutdown of the server
     compression_algorithms = {
@@ -28,12 +29,20 @@ class Server():
                 'verbose': args['youtube_dl_verbose'],
                 'quiet': args['youtube_dl_no_quiet']
             },
-            ProcessPoolExecutor(max_workers=args['youtube_dl_max_workers']))
+            ProcessPoolExecutor(
+                max_workers=args['youtube_dl_max_workers']
+            )
+        )
 
-        self.grpc_graceful_shutdown_timeout = args['grpc_graceful_shutdown_timeout']
+        self.grpc_graceful_shutdown_timeout = \
+            args['grpc_graceful_shutdown_timeout']
 
         self.server = grpc.aio.server(
-            compression=self.compression_algorithms[args['grpc_compression_algorithm']])
+            compression=self.compression_algorithms[
+                args['grpc_compression_algorithm']
+            ]
+        )
+
         AddYoutubeDLServer(YoutubeDLServer(), self.server)
 
         if not args['grpc_no_reflection']:

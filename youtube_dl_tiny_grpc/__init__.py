@@ -12,6 +12,7 @@ from .youtube_dl_tiny_grpc import (Server)
 
 _PROGNAME = 'youtube-dl-tiny-grpc'
 
+
 def main(argv=None):
     setproctitle(_PROGNAME)
     logging.basicConfig()
@@ -20,10 +21,11 @@ def main(argv=None):
     server = Server(args.__dict__)
     try:
         loop.run_until_complete(server.run())
-    except:
+    except:  # noqa: E722
         pass
     finally:
         loop.run_until_complete(*server.cleanup)
         loop.stop()
+
 
 __all__ = ['main']
