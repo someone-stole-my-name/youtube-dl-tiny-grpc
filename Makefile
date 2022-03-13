@@ -55,7 +55,7 @@ test-int: test-int-start test-int-run
 flake:
 	flake8 $(PROJECT) --exclude protobuf
 
-test: grpc build trivy test-int
+test: flake grpc build trivy test-int
 
 docker-%:
 	docker run \
