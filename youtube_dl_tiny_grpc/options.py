@@ -7,7 +7,7 @@ from .version import __version__
 
 from os import environ
 
-from .util import (guessType)
+from .util import (guess_type)
 
 _COMPRESSION_ALGORITHMS = ["none", "deflate", "gzip"]
 _DESCRIPTION = 'A tiny slice of youtube-dl exposed over gRPC'
@@ -88,7 +88,7 @@ def parse_opts(argv: list) -> argparse.Namespace:
 
     args = parser.parse_args(argv)
 
-    for action in parser._actions:
+    for action in parser.actions:
         action_name = action.option_strings[0].strip("--")
         if action_name.startswith((
             "grpc",
@@ -96,7 +96,7 @@ def parse_opts(argv: list) -> argparse.Namespace:
         )):
             env_var = action_name.upper().replace("-", "_")
             if environ.get(env_var) is not None:
-                val = guessType(environ[env_var])
+                val = guess_type(environ[env_var])
                 if val is not None:
                     setattr(args, action_name.replace("-", "_"), val)
                 else:

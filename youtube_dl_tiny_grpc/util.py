@@ -3,7 +3,7 @@ import signal
 from concurrent.futures import ProcessPoolExecutor as PoolExecutor
 
 
-def guessType(value):
+def guess_type(value):
     try:
         return int(value)
     except ValueError:

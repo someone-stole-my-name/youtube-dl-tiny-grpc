@@ -32,7 +32,8 @@ def shutdown_pool() -> None:
 class YoutubeDLServer(YoutubeDLServerBase):
     """Provides methods that implement functionality of YoutubeDL server."""
 
-    def _ExtractInfo(self, url: str, opts: dict) -> dict:
+    @staticmethod
+    def _extract_info(url: str, opts: dict) -> dict:
         ydl = YoutubeDL(opts)
         info = ydl.extract_info(url, False)
         return info
@@ -54,13 +55,12 @@ class YoutubeDLServer(YoutubeDLServerBase):
             preserving_proto_field_name=True
         )
 
-        ydl_opts = {**_YOUTUBE_DL_DEFAULT_OPTS, **ydl_custom_opts}
-        ydl_opts['simulate'] = True
+        ydl_opts = {**_YOUTUBE_DL_DEFAULT_OPTS, **ydl_custom_opts, 'simulate': True}
 
         loop = asyncio.get_event_loop()
         info = await loop.run_in_executor(
             _YOUTUBE_DL_PROCESS_POOL,
-            self._ExtractInfo,
+            self._extract_info,
             request.url,
             ydl_opts)
 

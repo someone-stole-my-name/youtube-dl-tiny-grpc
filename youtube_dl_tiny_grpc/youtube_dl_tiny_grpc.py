@@ -12,7 +12,7 @@ from .youtube_dl_service import configure as configure_youtube_dl_server
 from .youtube_dl_service import shutdown_pool as shutdown_youtube_dl_server
 
 
-class Server():
+class Server:
     # Holds the shutdown method for the caller to call and clean up
     # eg: loop.run_until_complete(*server.cleanup)
     cleanup = []
@@ -49,15 +49,15 @@ class Server():
             from grpc_reflection.v1alpha import reflection
 
             from .protobuf.youtube_dl_tiny_grpc_pb2 import \
-                DESCRIPTOR as youtube_dl_DESCRIPTOR
+                DESCRIPTOR
             reflection.enable_server_reflection((
-                youtube_dl_DESCRIPTOR.services_by_name['YoutubeDL'].full_name,
+                DESCRIPTOR.services_by_name['YoutubeDL'].full_name,
                 reflection.SERVICE_NAME,
             ), self.server)
 
         self.server.add_insecure_port(f"[::]:{args['grpc_port']}")
 
-        # Add our method for the caller to cleanup
+        # Add our method for the caller to clean up
         self.cleanup.append(self.shutdown())
 
         # Add signal handler for graceful shutdown
