@@ -3,6 +3,12 @@ import signal
 from concurrent.futures import ProcessPoolExecutor as PoolExecutor
 
 
+def port_is_in_use(port: int) -> bool:
+    import socket
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        return s.connect_ex(('localhost', port)) == 0
+
+
 def guess_type(value):
     try:
         return int(value)
