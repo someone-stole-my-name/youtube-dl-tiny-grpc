@@ -28,9 +28,10 @@ async def gen_key(v: str, *args: str) -> str:
 
 
 class Cache(object):
-    def __init__(self, uri: str):
+    def __init__(self, uri: str, ttl: int):
         log.info("Initializing!")
         self.uri = uri
+        self.ttl = ttl
         self.redis = aioredis.from_url(
                 self.uri,
                 decode_responses=False
@@ -64,6 +65,7 @@ class Cache(object):
         async with self.redis as redis_client:
             await redis_client.set(
                     key,
-                    gzip.compress(content.encode("utf-8"))
+                    gzip.compress(content.encode("utf-8")),
+                    ex=self.ttl
             )
         return None

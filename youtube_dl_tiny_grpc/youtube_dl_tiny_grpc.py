@@ -8,6 +8,7 @@ import grpc
 from .protobuf.youtube_dl_tiny_grpc_pb2_grpc import \
     add_YoutubeDLServicer_to_server as AddYoutubeDLServer
 from .util import ProcessPoolExecutor
+from .cache import Cache
 from .youtube_dl_service import YoutubeDLServer, \
     configure as configure_youtube_dl_server, \
     shutdown_pool as shutdown_youtube_dl_server
@@ -29,19 +30,34 @@ class Server:
     def __init__(self, args: dict):
         log.info("Initializing!")
 
+        base_youtube_dl_args = {
+            'verbose':   args['youtube_dl_verbose'],
+            'quiet':     args['youtube_dl_no_quiet'],
+            'simulate':  True,
+            'call_home': False
+        }
+
+        if args['youtube_dl_cookies_file'] is not None and \
+                args['youtube_dl_cookies_file'] != "":
+            base_youtube_dl_args['cookiefile'] = \
+                args['youtube_dl_cookies_file']
+
         redis = None
         if args['redis_enable']:
-            redis = args['redis_uri']
+            redis = Cache(args['redis_uri'], args['redis_ttl'])
+
+        proxy_list = None
+        if args['youtube_dl_proxy_list'] is not None and \
+                args['youtube_dl_proxy_list'] != "":
+            proxy_list = args['youtube_dl_proxy_list'].split(',')
 
         configure_youtube_dl_server(
-                {
-                    'verbose': args['youtube_dl_verbose'],
-                    'quiet':   args['youtube_dl_no_quiet']
-                },
+                base_youtube_dl_args,
                 ProcessPoolExecutor(
                         max_workers=args['youtube_dl_max_workers']
                 ),
-                redis
+                redis,
+                proxy_list
         )
 
         self.grpc_graceful_shutdown_timeout = \
@@ -75,8 +91,9 @@ class Server:
         signal.signal(signal.SIGTERM, self.exit_gracefully)
 
     def exit_gracefully(self, signum, frame):
-        log.info("starting graceful shutdown")
-        self.not_in_shutdown = False
+        if self.not_in_shutdown:
+            log.info("starting graceful shutdown")
+            self.not_in_shutdown = False
 
     async def shutdown(self) -> None:
         log.info("stopping server")

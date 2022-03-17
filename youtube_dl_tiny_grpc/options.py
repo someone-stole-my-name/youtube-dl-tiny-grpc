@@ -73,6 +73,20 @@ def parse_opts(argv: list) -> argparse.Namespace:
             help='Disable quiet output for youtube-dl',
     )
 
+    youtube_dl.add_argument(
+            '--youtube-dl-proxy-list',
+            default="",
+            type=str,
+            help="Comma separated list of proxies to use. For example 'socks5://127.0.0.1:1080,127.0.0.1:8080'"
+    )
+
+    youtube_dl.add_argument(
+            '--youtube-dl-cookies-file',
+            default="",
+            type=str,
+            help="File to read cookies from and dump cookie jar in"
+    )
+
     redis = parser.add_argument_group("redis")
 
     redis.add_argument(
@@ -91,7 +105,7 @@ def parse_opts(argv: list) -> argparse.Namespace:
     redis.add_argument(
             '--redis-ttl',
             type=int,
-            default=1800,
+            default=3600,
             help='TTL for cached results',
     )
 
@@ -131,7 +145,7 @@ def parse_opts(argv: list) -> argparse.Namespace:
                 else:
                     raise ValueError(f"Invalid value for {env_var}")
 
-    if args.verbose:
+    if args.verbose or args.debug:
         print("configuration:")
         for arg in vars(args):
             print(f"  {arg}: {getattr(args, arg)}")
