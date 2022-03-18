@@ -1,20 +1,19 @@
 from __future__ import annotations
-
 import asyncio
 import json
+import logging
 import random
-import grpc
+
 from google.protobuf.json_format import MessageToDict, ParseDict
+import grpc
 from youtube_dl import YoutubeDL
 
 from .cache import Cache, gen_key
-from .protobuf.youtube_dl_tiny_grpc_pb2 import (ExtractInfoRequest,
-                                                ExtractInfoResponse)
-from .protobuf.youtube_dl_tiny_grpc_pb2_grpc import \
-    YoutubeDLServicer as YoutubeDLServerBase
+from .protobuf.youtube_dl_tiny_grpc_pb2 import ExtractInfoRequest, ExtractInfoResponse
+from .protobuf.youtube_dl_tiny_grpc_pb2_grpc import (
+    YoutubeDLServicer as YoutubeDLServerBase,
+)
 from .util import ProcessPoolExecutor
-
-import logging
 
 # Offload all youtube_dl processing to a separate process in this pool
 # Idea from https://github.com/grpc/grpc/issues/16001
@@ -35,7 +34,7 @@ log = logging.getLogger(__name__)
 def configure(
         default_opts: dict,
         process_pool: ProcessPoolExecutor,
-        cache: str | None,
+        cache: Cache | None,
         proxy_list) -> None:
     global _YOUTUBE_DL_DEFAULT_OPTS
     global _YOUTUBE_DL_PROCESS_POOL
@@ -49,8 +48,11 @@ def configure(
 
 def shutdown_pool() -> None:
     global _YOUTUBE_DL_PROCESS_POOL
-    log.info("stopping process pool")
-    _YOUTUBE_DL_PROCESS_POOL.shutdown(False)
+    if isinstance(_YOUTUBE_DL_PROCESS_POOL, ProcessPoolExecutor):
+        log.info("stopping process pool")
+        _YOUTUBE_DL_PROCESS_POOL.shutdown(False)
+    else:
+        log.warning("cannot stop a non existent process pool")
 
 
 class YoutubeDLServer(YoutubeDLServerBase):

@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 # coding: utf-8
-import sys
 
 from setproctitle import setproctitle
 import logging
@@ -20,7 +19,6 @@ _PROGNAME = 'youtube-dl-tiny-grpc'
 _LOG_FORMAT = '%(levelname)s - %(asctime)s - %(name)s - %(process)d - %(' \
               'message)s'
 
-# logging.basicConfig(level='DEBUG', format=_LOG_FORMAT, stream=sys.stdout)
 
 def main(argv=None):
     setproctitle(_PROGNAME)

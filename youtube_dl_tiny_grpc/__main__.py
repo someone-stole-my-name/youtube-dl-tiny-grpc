@@ -9,6 +9,7 @@ if __package__ is None and not hasattr(sys, 'frozen'):
     path = os.path.realpath(os.path.abspath(__file__))
     sys.path.insert(0, os.path.dirname(os.path.dirname(path)))
 
+# pylint: disable=wrong-import-position
 import youtube_dl_tiny_grpc
 
 if __name__ == '__main__':
