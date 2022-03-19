@@ -18,6 +18,7 @@ log = logging.getLogger(__name__)
 
 class Server:
     """ YoutubeDL's gRPC Server """
+
     # Holds the shutdown method for the caller to call and clean up
     # eg: loop.run_until_complete(*server.cleanup)
     cleanup = []

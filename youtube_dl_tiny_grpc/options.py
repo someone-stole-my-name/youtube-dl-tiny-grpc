@@ -74,7 +74,8 @@ def parse_opts(argv: list) -> argparse.Namespace:
         '--youtube-dl-proxy-list',
         default="",
         type=str,
-        help="Comma separated list of proxies to use. For example 'socks5://127.0.0.1:1080,127.0.0.1:8080'"
+        help="Comma separated list of proxies to use. \
+        For example 'socks5://127.0.0.1:1080,http://127.0.0.1:8080'"
     )
 
     youtube_dl.add_argument(

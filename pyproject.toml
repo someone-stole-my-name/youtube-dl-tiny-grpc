@@ -12,4 +12,5 @@ venvPath = "."
 venv = "venv"
 
 reportMissingImports = true
-reportMissingTypeStubs = false
+reportMissingTypeStubs = true
+useLibraryCodeForTypes = true

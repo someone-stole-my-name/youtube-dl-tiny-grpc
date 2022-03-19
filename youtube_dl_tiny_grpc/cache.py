@@ -4,10 +4,10 @@ import asyncio
 import gzip
 import logging
 from hashlib import md5
-from tkinter import W
 from typing import Any
 
-import aioredis
+from aioredis import from_url
+from aioredis.exceptions import ConnectionError
 
 log = logging.getLogger(__name__)
 
@@ -36,7 +36,7 @@ class Cache(object):
         log.info("Initializing!")
         self.uri = uri
         self.ttl = ttl
-        self.redis = aioredis.from_url(
+        self.redis = from_url(
             self.uri,
             decode_responses=False
         )
@@ -45,10 +45,10 @@ class Cache(object):
         """ Check if the redis server is online. """
         try:
             await self.redis.ping()
-        except aioredis.exceptions.ConnectionError:
+        except ConnectionError:
             log.error('cannot connect to redis: %s', self.uri)
             return False
-        except Exception as ex: # pylint: disable=broad-except
+        except Exception as ex:  # pylint: disable=broad-except
             log.exception(ex)
             return False
         return True
