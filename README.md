@@ -142,14 +142,3 @@ Views       |                                                          |
           02/03       02/10       02/17      02/24       03/03       03/10 
                                        Date                                
 ```
-
-```
-ghz --insecure --async -e -d '{}' localhost:50051
-ghz --insecure --concurrency=5 -e -d '
-    {
-        "url":"https://www.youtube.com/channel/UCNAxrHudMfdzNi6NxruKPLw",
-        "options": {
-            "playlistend": 5
-        }
-    }' localhost:50051 --call=YoutubeDL/ExtractInfo
-```
