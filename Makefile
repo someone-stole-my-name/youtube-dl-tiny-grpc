@@ -11,18 +11,19 @@ clean:
 	rm -rf $(PROTOS_DIR_TARGET)/$(PROJECT)_pb2_grpc.py
 	rm -rf $(PROTOS_DIR_TARGET)/$(PROJECT)_pb2.py
 
-build: pb
+install_requires:
+	python3 -c "import configparser; c = configparser.ConfigParser(); c.read('setup.cfg'); print(c['options']['install_requires'])" | xargs pip install
+
+build: install_requires
 	pip install build twine
-	python3 -m build
+	python3 -m build -n
 	twine check dist/*
 
 flake:
 	pip install flake8
 	flake8 $(PROJECT) --exclude protobuf
 
-test: pb flake
-	pip install -e .
-	pip uninstall youtube-dl-tiny-grpc -y
+test: install_requires pb flake
 	python test/test_youtube_dl_tiny_grpc.py
 
 $(PROTOS_DIR_TARGET)/$(PROJECT)_pb2_grpc.py:
