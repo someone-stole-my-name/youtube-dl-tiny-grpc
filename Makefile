@@ -12,8 +12,9 @@ clean:
 	rm -rf $(PROTOS_DIR_TARGET)/$(PROJECT)_pb2.py
 
 build: pb
-	pip install build
+	pip install build twine
 	python3 -m build
+	twine check dist/*
 
 flake:
 	pip install flake8
