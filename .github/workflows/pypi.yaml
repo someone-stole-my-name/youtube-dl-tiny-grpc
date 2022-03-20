@@ -13,7 +13,7 @@ jobs:
           fetch-depth: 0
       - run: |
           make docker-test
-  build:
+  upload:
     runs-on: ubuntu-latest
     needs: [test]
     steps:
@@ -22,13 +22,6 @@ jobs:
           fetch-depth: 0
       - run: |
           make docker-build
-  upload:
-    runs-on: ubuntu-latest
-    needs: [build]
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
       - uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: __token__
