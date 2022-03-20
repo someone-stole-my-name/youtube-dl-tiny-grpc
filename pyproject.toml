@@ -1,0 +1,16 @@
+[build-system]
+requires = [
+  "setuptools >= 40.9.0",
+  "wheel",
+]
+build-backend = "setuptools.build_meta"
+
+[tool.pyright]
+include = ["youtube_dl_tiny_grpc"]
+exclude = ["**/__pycache__"]
+venvPath = "."
+venv = "venv"
+
+reportMissingImports = true
+reportMissingTypeStubs = false
+useLibraryCodeForTypes = true
