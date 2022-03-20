@@ -70,7 +70,6 @@ class YoutubeDLServer(YoutubeDLServerBase):
             proxy_timeout: int = 30) -> dict:
         """Wrapper around youtube-dl's extract_info method
         to handle retries with proxy rotation."""
-
         count = retries
         real_ydl_opts = opts
 
@@ -80,7 +79,7 @@ class YoutubeDLServer(YoutubeDLServerBase):
             real_ydl_opts['socket_timeout'] = proxy_timeout
 
         try:
-            ydl = YoutubeDL(opts)
+            ydl = YoutubeDL(real_ydl_opts)
             info = ydl.extract_info(url, False)
             return info
         except Exception as e:
@@ -100,9 +99,9 @@ class YoutubeDLServer(YoutubeDLServerBase):
                                 "invalid URL")
 
         ydl_custom_opts = MessageToDict(
-                request.options,
-                including_default_value_fields=False,
-                preserving_proto_field_name=True
+            request.options,
+            including_default_value_fields=False,
+            preserving_proto_field_name=True
         )
 
         ydl_opts = {
@@ -113,7 +112,7 @@ class YoutubeDLServer(YoutubeDLServerBase):
         info = None
         if self.cache is not None:
             cached_ok = await self.cache.get(
-                    await gen_key(request.url, json.dumps(ydl_opts))
+                await gen_key(request.url, json.dumps(ydl_opts))
             )
             if cached_ok:
                 info = json.loads(cached_ok)
@@ -124,25 +123,25 @@ class YoutubeDLServer(YoutubeDLServerBase):
             loop = asyncio.get_event_loop()
             try:
                 info = await loop.run_in_executor(
-                        _YOUTUBE_DL_PROCESS_POOL,
-                        self._extract_info,
-                        request.url,
-                        real_ydl_opts,
-                        5,
-                        _YOUTUBE_DL_PROXY_LIST)
+                    _YOUTUBE_DL_PROCESS_POOL,
+                    self._extract_info,
+                    request.url,
+                    real_ydl_opts,
+                    5,
+                    _YOUTUBE_DL_PROXY_LIST)
             except Exception as e:
                 log.exception(e)
                 await context.abort(
-                        grpc.StatusCode.INTERNAL,
-                        "unknown error occurred while extracting info",
+                    grpc.StatusCode.INTERNAL,
+                    "unknown error occurred while extracting info",
                 )
 
             json_info = json.dumps(info)
 
             if self.cache is not None:
                 await self.cache.set(
-                        await gen_key(request.url, json.dumps(ydl_opts)),
-                        json_info
+                    await gen_key(request.url, json.dumps(ydl_opts)),
+                    json_info
                 )
 
             # FIXME: Yes, this is a hack.
@@ -154,19 +153,19 @@ class YoutubeDLServer(YoutubeDLServerBase):
             entries = info['entries'][0]['entries']
             for entry in entries:
                 yield ParseDict(
-                        entry,
-                        ExtractInfoResponse(),
-                        ignore_unknown_fields=True)
+                    entry,
+                    ExtractInfoResponse(),
+                    ignore_unknown_fields=True)
         except KeyError:
             try:
                 entries = info['entries']
                 for entry in entries:
                     yield ParseDict(
-                            entry,
-                            ExtractInfoResponse(),
-                            ignore_unknown_fields=True)
-            except KeyError:
-                yield ParseDict(
-                        info,
+                        entry,
                         ExtractInfoResponse(),
                         ignore_unknown_fields=True)
+            except KeyError:
+                yield ParseDict(
+                    info,
+                    ExtractInfoResponse(),
+                    ignore_unknown_fields=True)

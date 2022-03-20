@@ -33,47 +33,49 @@ class Server:
         log.info("Initializing!")
 
         base_youtube_dl_args = {
-            'verbose':   args['youtube_dl_verbose'],
-            'quiet':     args['youtube_dl_no_quiet'],
+            'verbose':   args['youtube_dl_verbose'] if "youtube_dl_verbose" in args else False,
+            'quiet':     args['youtube_dl_no_quiet'] if "youtube_dl_no_quiet" in args else False,
             'simulate':  True,
             'call_home': False
         }
 
-        if args['youtube_dl_cookies_file'] is not None and \
+        if "youtube_dl_cookies_file" in args and \
+                args['youtube_dl_cookies_file'] is not None and \
                 args['youtube_dl_cookies_file'] != "":
             base_youtube_dl_args['cookiefile'] = \
                 args['youtube_dl_cookies_file']
 
         redis = None
-        if args['redis_enable']:
+        if "redis_enable" in args and \
+                args['redis_enable']:
             redis = Cache(args['redis_uri'], args['redis_ttl'])
 
         proxy_list = None
-        if args['youtube_dl_proxy_list'] is not None and \
+        if "youtube_dl_proxy_list" in args and args['youtube_dl_proxy_list'] is not None and \
                 args['youtube_dl_proxy_list'] != "":
             proxy_list = args['youtube_dl_proxy_list'].split(',')
 
         configure_youtube_dl_server(
             base_youtube_dl_args,
             ProcessPoolExecutor(
-                max_workers=args['youtube_dl_max_workers']
+                max_workers=args['youtube_dl_max_workers'] if "youtube_dl_max_workers" in args else 1
             ),
             redis,
             proxy_list
         )
 
         self.grpc_graceful_shutdown_timeout = \
-            args['grpc_graceful_shutdown_timeout']
+            args['grpc_graceful_shutdown_timeout'] if "grpc_graceful_shutdown_timeout" in args else 0
 
         self.server = grpc.aio.server(
             compression=self.compression_algorithms[
-                args['grpc_compression_algorithm']
+                args['grpc_compression_algorithm'] if "grpc_compression_algorithm" in args else "none"
             ]
         )
 
         AddYoutubeDLServer(YoutubeDLServer(), self.server)
 
-        if not args['grpc_no_reflection']:
+        if "grpc_no_reflection" in args and not args['grpc_no_reflection']:
             # pylint: disable=import-outside-toplevel
             from grpc_reflection.v1alpha import reflection
 
@@ -101,12 +103,13 @@ class Server:
 
     async def shutdown(self) -> None:
         """ Shutdown the server """
+        self._exit_gracefully(None, None)
         log.info("stopping server")
         await self.server.stop(self.grpc_graceful_shutdown_timeout)
         log.info("stopping youtube_dl process pool")
         shutdown_youtube_dl_server()
         log.info("waiting for server to stop")
-        await self.server.wait_for_termination()
+        await self.server.wait_for_termination(self.grpc_graceful_shutdown_timeout)
 
     async def run(self) -> None:
         """ Run the server """

@@ -31,7 +31,6 @@ def main(argv=None):
     else:
         logging.basicConfig()
 
-    log = logging.getLogger(__name__)
     loop = asyncio.get_event_loop()
 
     if port_is_in_use(args.grpc_port):

@@ -31,7 +31,10 @@ youtube-dl-tiny-grpc [-h] [--grpc-port GRPC_PORT]
                             [--grpc-compression-algorithm {none,deflate,gzip}]
                             [--youtube-dl-max-workers YOUTUBE_DL_MAX_WORKERS]
                             [--youtube-dl-verbose] [--youtube-dl-no-quiet]
-                            [--version] [--verbose]
+                            [--youtube-dl-proxy-list YOUTUBE_DL_PROXY_LIST]
+                            [--youtube-dl-cookies-file YOUTUBE_DL_COOKIES_FILE] [--redis-enable]
+                            [--redis-uri REDIS_URI] [--redis-ttl REDIS_TTL] [--version] [--debug]
+                            [--verbose]
 ```
 
 ### gRPC
@@ -44,7 +47,7 @@ youtube-dl-tiny-grpc [-h] [--grpc-port GRPC_PORT]
   --grpc-compression-algorithm {none,deflate,gzip}
                         Compression algorithm for the server (default: gzip)
 ```
-### `youtube-dl`
+### YoutubeDL
 
 ```
   --youtube-dl-max-workers YOUTUBE_DL_MAX_WORKERS
@@ -52,6 +55,21 @@ youtube-dl-tiny-grpc [-h] [--grpc-port GRPC_PORT]
   --youtube-dl-verbose  Verbose output for youtube-dl (default: False)
   --youtube-dl-no-quiet
                         Disable quiet output for youtube-dl (default: True)
+  --youtube-dl-proxy-list YOUTUBE_DL_PROXY_LIST
+                        Comma separated list of proxies to use. For example
+                        'socks5://127.0.0.1:1080,http://127.0.0.1:8080' (default: )
+  --youtube-dl-cookies-file YOUTUBE_DL_COOKIES_FILE
+                        File to read cookies from and dump cookie jar in (default: )
+```
+
+### Redis
+
+```
+  --redis-enable        Enable Redis cache support (default: False)
+  --redis-uri REDIS_URI
+                        Redis URI to connect to (default: redis://localhost:6379)
+  --redis-ttl REDIS_TTL
+                        TTL for cached results (default: 3600)
 ```
 
 ## Examples
