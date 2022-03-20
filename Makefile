@@ -14,7 +14,7 @@ clean:
 install_requires:
 	python3 -c "import configparser; c = configparser.ConfigParser(); c.read('setup.cfg'); print(c['options']['install_requires'])" | xargs pip install
 
-build: install_requires
+build: install_requires pb
 	pip install build twine
 	python3 -m build -n
 	twine check dist/*
