@@ -135,6 +135,7 @@ def parse_opts(argv: list) -> argparse.Namespace:
         if action_name.startswith((
                 "grpc",
                 "youtube-dl",
+                "redis"
         )):
             env_var = action_name.upper().replace("-", "_")
             if environ.get(env_var) is not None:
@@ -144,7 +145,7 @@ def parse_opts(argv: list) -> argparse.Namespace:
                 else:
                     raise ValueError(f"Invalid value for {env_var}")
 
-    if args.verbose or args.debug:
+    if args.verbose or args.debug or environ.get("DEBUG") is not None:
         print("configuration:")
         for arg in vars(args):
             print(f"  {arg}: {getattr(args, arg)}")
