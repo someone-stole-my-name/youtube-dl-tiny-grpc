@@ -2,6 +2,7 @@ PROJECT = youtube_dl_tiny_grpc
 PROTOS_DIR_SOURCE := protos
 PROTOS_DIR_TARGET := $(PROJECT)/protobuf
 DOCKER_EXTRA_ARGS :=
+IMAGENAME := ghcr.io/someone-stole-my-name/youtube-dl-tiny-grpc
 
 all: clean test build
 
@@ -15,7 +16,7 @@ install_requires:
 	python3 -c "import configparser; c = configparser.ConfigParser(); c.read('setup.cfg'); print(c['options']['install_requires'])" | xargs pip install
 
 build: install_requires pb
-	pip install build twine
+	pip install build twine wheel
 	python3 -m build -n
 	twine check dist/*
 
@@ -37,7 +38,35 @@ pb-dep:
 pb: pb-dep $(PROTOS_DIR_TARGET)/$(PROJECT)_pb2_grpc.py
 pb: pb-dep $(PROTOS_DIR_TARGET)/$(PROJECT)_pb2.py
 
-push: build
+ci-deps:
+	apt-get -qq -y install \
+		binfmt-support \
+		ca-certificates \
+		curl \
+		git \
+		gnupg \
+		lsb-release \
+		qemu-user-static \
+		wget \
+		jq
+
+ci-deps-docker: ci-deps
+	curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg && \
+	echo "deb [arch=$(shell dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian $(shell lsb_release -cs) stable" |\
+	tee /etc/apt/sources.list.d/docker.list > /dev/null && \
+	cat /etc/apt/sources.list.d/docker.list && \
+	apt-get update && \
+	apt-get -qq -y install \
+		docker-ce \
+		docker-ce-cli \
+		containerd.io
+
+ci-setup-buildx: ci-deps-docker
+	docker run --privileged --rm tonistiigi/binfmt --install all
+	docker buildx create --name mybuilder
+	docker buildx use mybuilder
+
+push: ci-setup-buildx build
 	docker buildx build --platform linux/amd64 -t $(IMAGENAME):latest . --push
 	docker buildx build --platform linux/amd64 -t $(IMAGENAME):$(shell git describe --tags --abbrev=0) . --push
 
@@ -48,4 +77,4 @@ docker-%: # Run a make command in a container
 		-v /var/run/docker.sock:/var/run/docker.sock \
 		-v $(shell pwd):/data \
 		-w /data $(DOCKER_EXTRA_ARGS) \
-		python:3.9-slim sh -c "apt-get update && apt-get install make && make $*"
+		python:3.9-slim sh -c "apt-get update && apt-get install make git -y && make $*"
