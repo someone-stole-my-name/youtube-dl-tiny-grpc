@@ -37,6 +37,10 @@ pb-dep:
 pb: pb-dep $(PROTOS_DIR_TARGET)/$(PROJECT)_pb2_grpc.py
 pb: pb-dep $(PROTOS_DIR_TARGET)/$(PROJECT)_pb2.py
 
+push: build
+	docker buildx build --platform linux/amd64 -t $(IMAGENAME):latest . --push
+	docker buildx build --platform linux/amd64 -t $(IMAGENAME):$(shell git describe --tags --abbrev=0) . --push
+
 docker-%: # Run a make command in a container
 	docker run \
 		--rm \
