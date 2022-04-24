@@ -20,6 +20,28 @@ def parse_opts(argv: list) -> argparse.Namespace:
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
 
+    prometheus = parser.add_argument_group("prometheus")
+
+    prometheus.add_argument(
+        '--prometheus-port',
+        default=8080,
+        type=int,
+        help='Port to listen on',
+    )
+
+    prometheus.add_argument(
+        '--prometheus-enable',
+        action='store_true',
+        help='Enable Prometheus metrics',
+    )
+
+    prometheus.add_argument(
+        '--prometheus-directory',
+        default="/tmp/youtube_dl_tiny_grpc_prometheus",
+        type=str,
+        help='Prometheus directory to share between processes',
+    )
+
     grpc = parser.add_argument_group("grpc")
 
     grpc.add_argument(
@@ -128,22 +150,6 @@ def parse_opts(argv: list) -> argparse.Namespace:
     )
 
     args = parser.parse_args(argv)
-
-    # pylint: disable=protected-access
-    for action in parser._actions:
-        action_name = action.option_strings[0].strip("--")
-        if action_name.startswith((
-                "grpc",
-                "youtube-dl",
-                "redis"
-        )):
-            env_var = action_name.upper().replace("-", "_")
-            if environ.get(env_var) is not None:
-                val = guess_type(environ[env_var])
-                if val is not None:
-                    setattr(args, action_name.replace("-", "_"), val)
-                else:
-                    raise ValueError(f"Invalid value for {env_var}")
 
     if args.verbose or args.debug or environ.get("DEBUG") is not None:
         print("configuration:")
