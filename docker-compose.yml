@@ -1,0 +1,25 @@
+---
+services:
+  youtube_dl_tiny_grpc:
+    build: .
+    entrypoint:
+      - python
+      - -m
+      - youtube_dl_tiny_grpc
+      - --verbose
+      - --debug
+      - --grpc-port
+      - '50051'
+      - --redis-enable
+      - --redis-uri
+      - redis://redis:6379
+      - --youtube-dl-max-workers
+      - '2'
+      - --prometheus-enable
+    ports:
+      - "50051:50051"
+      - "8080:8080"
+    links:
+      - redis
+  redis:
+    image: redis
