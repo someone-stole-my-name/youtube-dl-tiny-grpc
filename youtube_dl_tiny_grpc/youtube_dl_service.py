@@ -5,6 +5,8 @@ import logging
 import random
 
 from google.protobuf.json_format import MessageToDict, ParseDict
+from prometheus_client import Counter
+
 import grpc
 from youtube_dl import YoutubeDL
 
@@ -14,6 +16,12 @@ from .protobuf.youtube_dl_tiny_grpc_pb2_grpc import (
     YoutubeDLServicer as YoutubeDLServerBase,
 )
 from .util import ProcessPoolExecutor
+
+from .metrics import _REGISTRY
+
+REQUEST_TOTAL = Counter('request_total', 'Total number of requests', registry=_REGISTRY)
+CACHE_HIT_TOTAL = Counter('cache_hit_total', 'Total number of cache hits', registry=_REGISTRY)
+CACHE_MISS_TOTAL = Counter('cache_miss_total', 'Total number of cache misses', registry=_REGISTRY)
 
 # Offload all youtube_dl processing to a separate process in this pool
 # Idea from https://github.com/grpc/grpc/issues/16001
@@ -98,6 +106,8 @@ class YoutubeDLServer(YoutubeDLServerBase):
             await context.abort(grpc.StatusCode.INVALID_ARGUMENT,
                                 "invalid URL")
 
+        REQUEST_TOTAL.inc()
+
         ydl_custom_opts = MessageToDict(
             request.options,
             including_default_value_fields=False,
@@ -115,9 +125,11 @@ class YoutubeDLServer(YoutubeDLServerBase):
                 await gen_key(request.url, json.dumps(ydl_opts))
             )
             if cached_ok:
+                CACHE_HIT_TOTAL.inc()
                 info = json.loads(cached_ok)
 
         if info is None:
+            CACHE_MISS_TOTAL.inc()
             real_ydl_opts = ydl_opts
 
             loop = asyncio.get_event_loop()
