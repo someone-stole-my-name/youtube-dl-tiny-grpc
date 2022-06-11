@@ -5,6 +5,7 @@ import os
 
 _REGISTRY = CollectorRegistry()
 
+
 def prepare_metrics_directory(d: str) -> None:
     os.environ["PROMETHEUS_MULTIPROC_DIR"] = d
     if not os.path.exists(d):

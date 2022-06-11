@@ -4,7 +4,6 @@ from os import environ
 
 from setproctitle import getproctitle
 
-from .util import guess_type
 from .version import __version__
 
 _COMPRESSION_ALGORITHMS = ["none", "deflate", "gzip"]
